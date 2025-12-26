@@ -1,0 +1,6 @@
+{
+  "api_key": "PUT_YOUR_TOKEN_HERE",
+  "devices": [
+    { "name": "Curtain",    "device_id": "FB711B3DD74A" }
+  ]
+}
