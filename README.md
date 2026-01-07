@@ -1,25 +1,47 @@
 # SwitchBot Controller
 
-SwitchBot Cloud API を使って、登録したデバイスを **ON / OFF** できる最小構成のWindows向けGUIアプリです。  
-デバイスの追加・編集は **`config.json` を直接編集**して行います（アプリ上の設定UIはありません）。
+- SwitchBot Cloud API を使って、登録したデバイスを ON / OFF できる最小構成のWindows向けGUIアプリです。  
+- SwitchBotデバイスにのみ対応し、Hub経由の赤外線リモコンには対応していません。
+- デバイスの追加・編集は **`config.json` を直接編集**して行います（アプリ上に設定用UIはありません）。
+
+<img src="./docs/images/screen.jpg" width=350 alt="screen" />
+
+## 使用方法
+
+- Releaseから最新の実行ファイルのzip (SwitchBotController_XX.zip)をダウンロードしてください。
+- zipを解凍後、ご自身の環境に合わせたconfig.jsonを作成し、SwitchBotController_XX.exeと同じ階層に配置してください。
+- SwitchBotController_XX.exeを実行してください。
+
+### config.json
+
+1. SwitchBotのスマホアプリを開き、ログインします。
+2. プロフィール > 設定 > 基本データ の **アプリバージョン** を10回タップします。
+3. 開発者向けオプションをタップすると表示される **トークン** をメモしておいてください。
+
+<img src="./docs/images/setting.jpg" width="250" alt="setting" />
+<img src="./docs/images/developerOptions.jpg" width="250" alt="developerOptions" />
+
+
+4. SwitchBotデバイスの 設定 > デバイス情報 を開き **BLE MAC** をメモしておいてください。
+
+<img src="./docs/images/deviceInformation.jpg" width="250" alt="deviceInformation" />
+
+
+5. config.json.exampleに倣ってconfig.jsonを新規作成してください。
+  - api_token : メモした **トークン**
+  - name : アプリ上で表示するデバイス名
+  - ble_mac : デバイスごとの **BLE MAC** （コロンを除く）
 
 ---
 
-## Features
-- デバイス一覧を表示し、各デバイスを ON / OFF
-- 右側スクロールバーは **必要なときだけ表示**
-- 下部に **1行ステータス**（送信中 / 結果コードなど）
+## ビルド方法
+ご自身でビルドする場合は下記情報を参考にしてください。
 
----
-
-## Requirements
+### Requirements
 - Windows
 - Python 3.10+（推奨: 3.12）
-- SwitchBot API Token（SwitchBotアプリから取得）
 
----
-
-## Repository Layout (recommended)
+### Repository Layout (recommended)
 
 ```
 SwitchBotController/
@@ -27,15 +49,13 @@ SwitchBotController/
     switchbot_controller.py
   scripts/
     build.ps1
+  assets/
+    icon.ico
   requirements.txt
-  config.example.json
   config.json            # local only (DO NOT COMMIT)
 ```
 
----
-
-## Setup (Development)
-
+### Setup
 ```bat
 cd /d C:\workspace\SwitchBotController
 py -3.12 -m venv .venv
@@ -45,57 +65,10 @@ pip install -r requirements.txt
 python src\switchbot_controller.py
 ```
 
-`requirements.txt` は最小で以下です:
-
-```txt
-requests
-```
-
----
-
-## Configuration
-
-### IMPORTANT
-`config.json` には **APIトークンが平文で入ります**。  
-**絶対にGitにコミットしないでください**（`.gitignore` 対象にすること）。
-
-### config.example.json
-まず `config.example.json` を用意して、構成のテンプレとしてコミットします。
-
-```json
-{
-  "api_key": "PUT_YOUR_TOKEN_HERE",
-  "devices": [
-    { "name": "Curtain", "device_id": "FB711B3DD74A" },
-    { "name": "LED", "device_id": "6055F9354302" }
-  ]
-}
-```
-
-### config.json（ローカル用）
-テンプレをコピーして `config.json` を作り、`api_key` を本物に置き換えてください。
-
-```bat
-copy config.example.json config.json
-```
-
----
-
-## Build (EXE)
-
-本リポジトリは **onefile（exe 1本）** でビルドします。  
-実行時は **exe と同じフォルダに `config.json` を置く**運用を想定しています。
-
-### One-command build (PowerShell)
-
+### One-command build
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1
 ```
 
 Output:
 - `dist\SwitchBotController.exe`
-
----
-
-## License
-Private / Personal use. (Edit as you like)

@@ -14,7 +14,7 @@ API_BASE = "https://api.switch-bot.com/v1.0"
 @dataclass(frozen=True)
 class Device:
     name: str
-    device_id: str
+    ble_mac: str
 
 
 def load_config(path: Path) -> tuple[str, list[Device]]:
@@ -22,9 +22,9 @@ def load_config(path: Path) -> tuple[str, list[Device]]:
         raise FileNotFoundError(f"Config not found: {path.resolve()}")
 
     cfg = json.loads(path.read_text(encoding="utf-8"))
-    api_key = (cfg.get("api_key") or "").strip()
-    if not api_key:
-        raise ValueError("api_key is empty in config.json")
+    api_token = (cfg.get("api_token") or "").strip()
+    if not api_token:
+        raise ValueError("api_token is empty in config.json")
 
     raw = cfg.get("devices")
     if not isinstance(raw, list) or not raw:
@@ -35,18 +35,18 @@ def load_config(path: Path) -> tuple[str, list[Device]]:
         if not isinstance(d, dict):
             continue
         name = (d.get("name") or "").strip()
-        did = (d.get("device_id") or "").strip()
+        did = (d.get("ble_mac") or "").strip()
         if name and did:
             devices.append(Device(name, did))
 
     if not devices:
         raise ValueError("No valid devices in config.json")
-    return api_key, devices
+    return api_token, devices
 
 
-def post_command(api_key: str, device_id: str, command: str) -> requests.Response:
-    url = f"{API_BASE}/devices/{device_id}/commands"
-    headers = {"Authorization": api_key, "Content-Type": "application/json; charset=utf8"}
+def post_command(api_token: str, ble_mac: str, command: str) -> requests.Response:
+    url = f"{API_BASE}/devices/{ble_mac}/commands"
+    headers = {"Authorization": api_token, "Content-Type": "application/json; charset=utf8"}
     payload = {"command": command, "parameter": "default", "commandType": "command"}
     return requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
 
@@ -55,7 +55,7 @@ class App(ttk.Frame):
     def __init__(self, master: tk.Tk):
         super().__init__(master, padding=10)
         self.master = master
-        self.api_key = ""
+        self.api_token = ""
         self.devices: list[Device] = []
         self.status = tk.StringVar(value="")
 
@@ -113,7 +113,7 @@ class App(ttk.Frame):
     # ---- Logic ----
     def _load(self):
         try:
-            self.api_key, self.devices = load_config(CONFIG)
+            self.api_token, self.devices = load_config(CONFIG)
             self.status.set(f"Loaded {len(self.devices)} devices ({CONFIG.name})")
         except Exception as e:
             messagebox.showerror("Config error", f"{e}")
@@ -137,13 +137,13 @@ class App(ttk.Frame):
             btns = ttk.Frame(self.list_frame)
             btns.grid(row=i, column=1, sticky="w", padx=(6, 0), pady=6)
 
-            ttk.Button(btns, text="ON",  command=lambda did=d.device_id, nm=d.name: self._send(nm, did, "turnOn")).grid(row=0, column=0, padx=2)
-            ttk.Button(btns, text="OFF", command=lambda did=d.device_id, nm=d.name: self._send(nm, did, "turnOff")).grid(row=0, column=1, padx=2)
+            ttk.Button(btns, text="ON",  command=lambda did=d.ble_mac, nm=d.name: self._send(nm, did, "turnOn")).grid(row=0, column=0, padx=2)
+            ttk.Button(btns, text="OFF", command=lambda did=d.ble_mac, nm=d.name: self._send(nm, did, "turnOff")).grid(row=0, column=1, padx=2)
 
         self._sync_scroll()
 
-    def _send(self, name: str, device_id: str, command: str):
-        if not self.api_key:
+    def _send(self, name: str, ble_mac: str, command: str):
+        if not self.api_token:
             self.status.set("API key missing")
             return
 
@@ -151,7 +151,7 @@ class App(ttk.Frame):
 
         def worker():
             try:
-                r = post_command(self.api_key, device_id, command)
+                r = post_command(self.api_token, ble_mac, command)
                 self.master.after(0, lambda: self.status.set(f"{command} {name} -> {r.status_code}"))
             except Exception as e:
                 self.master.after(0, lambda: self.status.set(f"{command} {name} -> ERROR {e}"))

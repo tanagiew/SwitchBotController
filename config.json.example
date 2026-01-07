@@ -1,0 +1,7 @@
+{
+  "api_token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "devices": [
+    { "name": "device1", "ble_mac": "YYYYYYYYYYYY" },
+    { "name": "device2", "ble_mac": "ZZZZZZZZZZZZ" }
+  ]
+}
