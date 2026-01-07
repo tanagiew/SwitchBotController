@@ -10,7 +10,7 @@
 
 - Releaseから最新の実行ファイルのzip (SwitchBotController_XX.zip)をダウンロードしてください。
 - zipを解凍後、ご自身の環境に合わせたconfig.jsonを作成し、SwitchBotController.exeと同じ階層に配置してください。
-- SwitchBotController_XX.exeを実行してください。
+- SwitchBotController.exeを実行してください。
 
 ### config.json
 
