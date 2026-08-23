@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.UI.Xaml.Controls;
 using SwitchBotController.App.Configuration;
 using SwitchBotController.App.ViewModels;
@@ -21,7 +22,6 @@ public sealed partial class MainPage : Page
     };
 
     private readonly ConfigurationPathStore _configurationPathStore;
-    private readonly string _defaultConfigurationPath;
 
     public MainPageViewModel ViewModel { get; }
 
@@ -29,9 +29,8 @@ public sealed partial class MainPage : Page
     {
         _configurationPathStore = new ConfigurationPathStore(
             ConfigurationPathResolver.SettingsFilePath);
-        _defaultConfigurationPath = ConfigurationPathResolver.Resolve();
         var initialConfigurationPath =
-            _configurationPathStore.Load() ?? _defaultConfigurationPath;
+            _configurationPathStore.Load() ?? ConfigurationPathResolver.Resolve();
 
         ViewModel = new MainPageViewModel(
             new SwitchBotConfigLoader(),
@@ -71,24 +70,31 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void OnResetConfigClicked(
+    private void OnOpenConfigClicked(
         object sender,
         Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (!await ViewModel.ChangeConfigurationAsync(_defaultConfigurationPath))
-        {
-            return;
-        }
-
         try
         {
-            _configurationPathStore.Reset();
+            if (!File.Exists(ViewModel.ConfigLocation))
+            {
+                ViewModel.ReportSettingsError(
+                    $"設定ファイルが見つかりません: {ViewModel.ConfigLocation}");
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = ViewModel.ConfigLocation,
+                UseShellExecute = true
+            });
             SettingsButton.Flyout?.Hide();
         }
         catch (Exception exception)
         {
             ViewModel.ReportSettingsError(
-                $"保存した設定ファイルの場所を解除できませんでした: {exception.Message}");
+                $"設定ファイルを開けませんでした: {exception.Message}");
         }
     }
+
 }

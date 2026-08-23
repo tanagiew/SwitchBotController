@@ -30,6 +30,8 @@ public sealed partial class DeviceControlViewModel : ObservableObject
 
     public string DeviceId { get; }
 
+    public int? LastKnownPosition { get; set; }
+
     private bool CanSend() => !IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanSend))]

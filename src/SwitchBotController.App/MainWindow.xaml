@@ -20,7 +20,7 @@
 
         <TitleBar x:Name="AppTitleBar" Title="SwitchBot Controller">
             <TitleBar.IconSource>
-                <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+                <ImageIconSource ImageSource="ms-appx:///Assets/TitleBarIconV2.png" />
             </TitleBar.IconSource>
         </TitleBar>
 

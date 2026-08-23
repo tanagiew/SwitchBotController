@@ -20,12 +20,15 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
-        AppWindow.SetIcon("Assets/AppIcon.ico");
+        AppWindow.SetIcon(Path.Combine(
+            AppContext.BaseDirectory,
+            "Assets",
+            "AppIcon.ico"));
         var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var displayScale = GetDpiForWindow(windowHandle) / 96d;
         AppWindow.Resize(new Windows.Graphics.SizeInt32(
-            (int)Math.Round(960 * displayScale),
-            (int)Math.Round(720 * displayScale)));
+            (int)Math.Round(600 * displayScale),
+            (int)Math.Round(760 * displayScale)));
 
         // Navigate the root frame to the main page on startup.
         RootFrame.Navigate(typeof(MainPage));

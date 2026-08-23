@@ -14,55 +14,48 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Page.Resources>
 
-    <Grid Padding="32,24,32,28" RowSpacing="18">
+    <Grid Padding="24,20,24,24" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid ColumnSpacing="16">
+        <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Spacing="4">
-                <TextBlock
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Text="デバイス" />
-                <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind ViewModel.DeviceSummary, Mode=OneWay}" />
-                <TextBlock
-                    MaxWidth="620"
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="{x:Bind ViewModel.ConfigLocation, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis"
-                    ToolTipService.ToolTip="{x:Bind ViewModel.ConfigLocation, Mode=OneWay}" />
-            </StackPanel>
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="22"
+                FontWeight="SemiBold"
+                Text="{x:Bind ViewModel.DeviceSummary, Mode=OneWay}" />
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                 <ProgressRing
-                    Width="20"
-                    Height="20"
+                    Width="18"
+                    Height="18"
                     IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
                 <Button
+                    Width="40"
+                    Height="40"
+                    AutomationProperties.Name="config.jsonを再読み込み"
                     Command="{x:Bind ViewModel.ReloadCommand}"
                     ToolTipService.ToolTip="config.jsonを再読み込み">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                        <TextBlock Text="再読み込み" />
-                    </StackPanel>
+                    <FontIcon FontSize="15" Glyph="&#xE72C;" />
                 </Button>
                 <Button
                     x:Name="SettingsButton"
+                    Width="40"
+                    Height="40"
+                    AutomationProperties.Name="設定"
                     ToolTipService.ToolTip="設定ファイルを選択">
                     <FontIcon FontSize="15" Glyph="&#xE713;" />
                     <Button.Flyout>
                         <Flyout Placement="BottomEdgeAlignedRight">
-                            <StackPanel Width="420" Spacing="12">
+                            <StackPanel Width="380" Spacing="12">
                                 <TextBlock
                                     Style="{StaticResource SubtitleTextBlockStyle}"
                                     Text="設定" />
@@ -75,14 +68,14 @@
                                     TextWrapping="Wrap" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Button
+                                        Click="OnOpenConfigClicked"
+                                        Content="ファイルを開く"
+                                        IsEnabled="{x:Bind ViewModel.IsSettingsInteractionEnabled, Mode=OneWay}" />
+                                    <Button
                                         Click="OnChooseConfigClicked"
-                                        Content="ファイルを選択"
+                                        Content="別のファイルを選択"
                                         IsEnabled="{x:Bind ViewModel.IsSettingsInteractionEnabled, Mode=OneWay}"
                                         Style="{StaticResource AccentButtonStyle}" />
-                                    <Button
-                                        Click="OnResetConfigClicked"
-                                        Content="既定に戻す"
-                                        IsEnabled="{x:Bind ViewModel.IsSettingsInteractionEnabled, Mode=OneWay}" />
                                 </StackPanel>
                                 <TextBlock
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -110,31 +103,18 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:DeviceControlViewModel">
                         <Border
-                            Padding="18"
+                            Padding="16"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
                             CornerRadius="8">
-                            <Grid ColumnSpacing="16">
+                            <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="52" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border
-                                    Width="48"
-                                    Height="48"
-                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                    CornerRadius="24">
-                                    <FontIcon
-                                        FontSize="22"
-                                        Foreground="White"
-                                        Glyph="&#xE7E8;" />
-                                </Border>
-
                                 <StackPanel
-                                    Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Spacing="3">
                                     <TextBlock
@@ -148,22 +128,23 @@
                                             IsActive="{x:Bind IsBusy, Mode=OneWay}" />
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind StatusText, Mode=OneWay}" />
+                                            Text="{x:Bind StatusText, Mode=OneWay}"
+                                            TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel
-                                    Grid.Column="2"
+                                    Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Orientation="Horizontal"
                                     Spacing="8">
                                     <Button
-                                        MinWidth="82"
+                                        MinWidth="68"
                                         Command="{x:Bind TurnOnCommand}"
                                         Content="ON"
                                         Style="{StaticResource AccentButtonStyle}" />
                                     <Button
-                                        MinWidth="82"
+                                        MinWidth="68"
                                         Command="{x:Bind TurnOffCommand}"
                                         Content="OFF" />
                                 </StackPanel>
@@ -192,26 +173,14 @@
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="config.jsonを確認してから、再読み込みしてください。" />
-                <TextBlock
-                    MaxWidth="520"
-                    TextAlignment="Center"
-                    TextTrimming="CharacterEllipsis"
-                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="{x:Bind ViewModel.ConfigLocation, Mode=OneWay}" />
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="2">
-            <InfoBar
-                IsClosable="False"
-                IsOpen="{x:Bind ViewModel.IsInfoStatus, Mode=OneWay}"
-                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                Severity="Informational" />
-            <InfoBar
-                IsClosable="False"
-                IsOpen="{x:Bind ViewModel.IsErrorStatus, Mode=OneWay}"
-                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                Severity="Error" />
-        </Grid>
+        <InfoBar
+            Grid.Row="2"
+            IsClosable="False"
+            IsOpen="True"
+            Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+            Severity="{x:Bind ViewModel.StatusSeverity, Mode=OneWay}" />
     </Grid>
 </Page>

@@ -32,19 +32,6 @@ public sealed class ConfigurationPathStoreTests
     }
 
     [Fact]
-    public async Task Reset_RemovesSavedConfigurationPath()
-    {
-        using var temporaryDirectory = new TemporaryDirectory();
-        var store = new ConfigurationPathStore(
-            Path.Combine(temporaryDirectory.Path, "settings.json"));
-        await store.SaveAsync(Path.Combine(temporaryDirectory.Path, "config.json"));
-
-        store.Reset();
-
-        Assert.Null(store.Load());
-    }
-
-    [Fact]
     public async Task Load_ReturnsNull_WhenSettingsAreInvalidJson()
     {
         using var temporaryDirectory = new TemporaryDirectory();

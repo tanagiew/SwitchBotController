@@ -3,6 +3,7 @@
 - SwitchBot Cloud API を使って、登録したデバイスを ON / OFF できる最小構成のWindows向けGUIアプリです。  
 - SwitchBotデバイスにのみ対応し、Hub経由の赤外線リモコンには対応していません。
 - デバイスの追加・編集は **`config.json` を直接編集**して行います。WinUI 3版では、画面右上の設定ボタンから使用するJSONファイルを選べます。
+- WinUI 3版は起動時・再読み込み時に、`config.json`へ登録された全デバイスの状態を取得します。取得できない機器があっても、ほかの機器の表示と操作は継続します。
 
 <img src="./docs/images/screen.jpg" width=350 alt="screen" />
 
@@ -35,6 +36,8 @@
 > WinUI 3移行版は、既存環境との互換性のため `api_key` / `device_id` 形式も読み込めます。
 
 WinUI 3版で選択したファイルの場所は、MSIX版ではWindows管理のアプリローカル領域、非MSIX版では `%LOCALAPPDATA%\SwitchBotController\settings.json` に保存されます。APIトークンやデバイス情報はコピーせず、元の `config.json` にだけ保持します。選択したJSONを読み込めない場合は、現在使用中の設定を維持します。
+
+画面右上の設定ボタンから、現在使用中の `config.json` を既定のエディターで直接開くこともできます。編集後は再読み込みボタンで反映してください。
 
 ---
 

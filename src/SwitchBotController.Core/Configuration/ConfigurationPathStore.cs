@@ -88,14 +88,6 @@ public sealed class ConfigurationPathStore
         }
     }
 
-    public void Reset()
-    {
-        if (File.Exists(_settingsPath))
-        {
-            File.Delete(_settingsPath);
-        }
-    }
-
     private sealed class SettingsFile
     {
         [JsonPropertyName("config_path")]
