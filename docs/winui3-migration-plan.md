@@ -29,4 +29,4 @@ Rebuild the desktop UI with C# and WinUI 3 while retaining the existing Python a
 
 ## Next milestone
 
-Review and commit the completed migration checkpoint, and then add settings/configuration selection before choosing the final packaging format.
+Add settings/configuration selection before choosing the final packaging format.
