@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SwitchBotController.Core.Api;
 using SwitchBotController.Core.Configuration;
+using SwitchBotController.Core.Models;
 
 namespace SwitchBotController.App.ViewModels;
 
@@ -10,7 +11,7 @@ public sealed partial class MainPageViewModel : ObservableObject
 {
     private readonly SwitchBotConfigLoader _configLoader;
     private readonly ISwitchBotClient _switchBotClient;
-    private readonly string _configPath;
+    private string _configPath;
     private string _apiToken = string.Empty;
     private bool _isInitialized;
 
@@ -27,10 +28,16 @@ public sealed partial class MainPageViewModel : ObservableObject
     public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
+    public partial bool IsSettingsInteractionEnabled { get; set; } = true;
+
+    [ObservableProperty]
     public partial string StatusMessage { get; set; } = "設定を読み込んでいます…";
 
     [ObservableProperty]
     public partial string DeviceSummary { get; set; } = "デバイスを読み込んでいます";
+
+    [ObservableProperty]
+    public partial string ConfigLocation { get; set; }
 
     public MainPageViewModel(
         SwitchBotConfigLoader configLoader,
@@ -45,8 +52,6 @@ public sealed partial class MainPageViewModel : ObservableObject
 
     public ObservableCollection<DeviceControlViewModel> Devices { get; } = [];
 
-    public string ConfigLocation { get; }
-
     public Task InitializeAsync()
     {
         if (_isInitialized)
@@ -58,6 +63,39 @@ public sealed partial class MainPageViewModel : ObservableObject
         return ReloadAsync();
     }
 
+    public async Task<bool> ChangeConfigurationAsync(string configPath)
+    {
+        IsLoading = true;
+        SetStatus("選択した設定を確認しています…");
+
+        try
+        {
+            var normalizedPath = Path.GetFullPath(configPath);
+            var configuration = await _configLoader.LoadAsync(normalizedPath);
+
+            _configPath = normalizedPath;
+            ConfigLocation = normalizedPath;
+            ApplyConfiguration(configuration);
+            SetStatus($"{Devices.Count} 台のデバイスを読み込みました");
+            return true;
+        }
+        catch (Exception exception)
+        {
+            SetStatus(
+                $"選択した設定は使用できません: {exception.Message}",
+                isError: true);
+            return false;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public void ReportSettingsError(string message) => SetStatus(message, isError: true);
+
+    partial void OnIsLoadingChanged(bool value) => IsSettingsInteractionEnabled = !value;
+
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task ReloadAsync()
     {
@@ -67,16 +105,7 @@ public sealed partial class MainPageViewModel : ObservableObject
         try
         {
             var configuration = await _configLoader.LoadAsync(_configPath);
-            _apiToken = configuration.ApiToken;
-
-            Devices.Clear();
-            foreach (var device in configuration.Devices)
-            {
-                Devices.Add(new DeviceControlViewModel(device, SendCommandAsync));
-            }
-
-            HasDevices = Devices.Count > 0;
-            DeviceSummary = $"{Devices.Count} 台のデバイス";
+            ApplyConfiguration(configuration);
             SetStatus($"{Devices.Count} 台のデバイスを読み込みました");
         }
         catch (Exception exception)
@@ -91,6 +120,20 @@ public sealed partial class MainPageViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    private void ApplyConfiguration(SwitchBotConfiguration configuration)
+    {
+        _apiToken = configuration.ApiToken;
+
+        Devices.Clear();
+        foreach (var device in configuration.Devices)
+        {
+            Devices.Add(new DeviceControlViewModel(device, SendCommandAsync));
+        }
+
+        HasDevices = Devices.Count > 0;
+        DeviceSummary = $"{Devices.Count} 台のデバイス";
     }
 
     private async Task SendCommandAsync(

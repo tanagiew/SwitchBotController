@@ -2,7 +2,7 @@
 
 - SwitchBot Cloud API を使って、登録したデバイスを ON / OFF できる最小構成のWindows向けGUIアプリです。  
 - SwitchBotデバイスにのみ対応し、Hub経由の赤外線リモコンには対応していません。
-- デバイスの追加・編集は **`config.json` を直接編集**して行います（アプリ上に設定用UIはありません）。
+- デバイスの追加・編集は **`config.json` を直接編集**して行います。WinUI 3版では、画面右上の設定ボタンから使用するJSONファイルを選べます。
 
 <img src="./docs/images/screen.jpg" width=350 alt="screen" />
 
@@ -34,9 +34,27 @@
 
 > WinUI 3移行版は、既存環境との互換性のため `api_key` / `device_id` 形式も読み込めます。
 
+WinUI 3版で選択したファイルの場所は、MSIX版ではWindows管理のアプリローカル領域、非MSIX版では `%LOCALAPPDATA%\SwitchBotController\settings.json` に保存されます。APIトークンやデバイス情報はコピーせず、元の `config.json` にだけ保持します。選択したJSONを読み込めない場合は、現在使用中の設定を維持します。
+
 ---
 
-## ビルド方法
+## WinUI 3版のビルド方法
+
+### Requirements
+
+- Windows 10 1809以降
+- .NET 10 SDK
+- Visual Studio 2026のWinUIアプリ開発環境とWindows App SDK
+
+```powershell
+dotnet restore .\SwitchBotController.sln
+dotnet test .\tests\SwitchBotController.Core.Tests\SwitchBotController.Core.Tests.csproj
+dotnet build .\SwitchBotController.sln --configuration Debug --property:Platform=x64
+dotnet run --project .\src\SwitchBotController.App\SwitchBotController.App.csproj --property:Platform=x64
+```
+
+## Python版のビルド方法
+
 ご自身でビルドする場合は下記情報を参考にしてください。
 
 ### Requirements
