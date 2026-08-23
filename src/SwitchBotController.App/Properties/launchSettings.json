@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SwitchBotController.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SwitchBotController.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

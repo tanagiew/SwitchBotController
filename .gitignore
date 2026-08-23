@@ -17,6 +17,20 @@ Thumbs.db
 dist/
 build/
 *.spec
+[Bb]in/
+[Oo]bj/
+artifacts/
+
+# Visual Studio / .NET
+.vs/
+*.user
+*.suo
+*.sln.docstates
+[Tt]est[Rr]esult*/
+*.trx
+AppPackages/
+BundleArtifacts/
+publish/
 
 # Local config (contains secrets)
 config.json
