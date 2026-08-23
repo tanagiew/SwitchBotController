@@ -2,7 +2,7 @@
 
 ## Goal
 
-Rebuild the desktop UI with C# and WinUI 3 while retaining the existing Python app as the behavior reference until feature parity is confirmed.
+Rebuild the desktop application with C# and WinUI 3, preserving the established behavior while modernizing the UI and distribution model.
 
 ## Solution structure
 
@@ -16,7 +16,6 @@ Rebuild the desktop UI with C# and WinUI 3 while retaining the existing Python a
 - Accept both existing configuration variants: `api_token`/`ble_mac` and the legacy `api_key`/`device_id` names.
 - Preserve the existing SwitchBot API v1.0 ON/OFF behavior before considering an API upgrade.
 - Never commit `config.json` or an API token.
-- Do not remove the Python implementation until the C# application reaches feature parity.
 - Use fake configuration values and a fake HTTP handler in automated tests.
 
 ## Completed milestone
@@ -39,7 +38,10 @@ Rebuild the desktop UI with C# and WinUI 3 while retaining the existing Python a
 - Added bounded post-command status observation: devices reporting position/movement are refreshed until movement stops, while power-only devices perform one delayed refresh.
 - Validated both HTTP and SwitchBot body status codes for commands so an API-level rejection is not reported as success.
 - Cancelled stale status refresh and post-command polling when the configuration changes, while preserving per-device failure isolation and the four-request concurrency limit.
+- Reached feature parity, removed the superseded Python implementation, and retained the original history in Git.
+- Added a self-contained unpackaged x64 publish profile and a repeatable release script that creates an install-free ZIP without including `config.json`.
+- Verified the ZIP from an isolated extraction path without issuing device commands.
 
 ## Next milestone
 
-Finalize the README, remove the superseded Python implementation, choose the distribution format, and verify the release ZIP on a clean launch path.
+Add the final application screenshot to the README, then create and publish the first GitHub Release.

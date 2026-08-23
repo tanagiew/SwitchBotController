@@ -1,97 +1,107 @@
 # SwitchBot Controller
 
-- SwitchBot Cloud API を使って、登録したデバイスを ON / OFF できる最小構成のWindows向けGUIアプリです。  
-- SwitchBotデバイスにのみ対応し、Hub経由の赤外線リモコンには対応していません。
-- デバイスの追加・編集は **`config.json` を直接編集**して行います。WinUI 3版では、画面右上の設定ボタンから使用するJSONファイルを選べます。
-- WinUI 3版は起動時・再読み込み時に、`config.json`へ登録された全デバイスの状態を取得します。取得できない機器があっても、ほかの機器の表示と操作は継続します。
+SwitchBot Cloud APIを使い、`config.json`に登録したデバイスをWindowsから操作するWinUI 3アプリです。
 
-<img src="./docs/images/screen.jpg" width=350 alt="screen" />
+- 登録した全デバイスの状態を起動時・再読み込み時に取得
+- デバイスごとのON／OFF操作と操作結果の表示
+- 一部デバイスでは電源状態、カーテン位置、動作状態など、APIが返した情報を表示
+- 1台の状態取得に失敗しても、ほかのデバイスの表示と操作を継続
+- 使用する`config.json`の選択と、既定のエディターでの直接編集
+- インストール不要の自己完結型Windowsアプリ
 
-## 使用方法
+SwitchBotデバイスを対象としており、Hub経由の赤外線リモコンには対応していません。
 
-- Releaseから最新の実行ファイルのzip (SwitchBotController_XX.zip)をダウンロードしてください。
-- zipを解凍後、ご自身の環境に合わせたconfig.jsonを作成し、SwitchBotController.exeと同じ階層に配置してください。
-- SwitchBotController.exeを実行してください。
+## 動作環境
 
-### config.json
+- 64bit版のWindows 10 Version 1809以降、またはWindows 11
+- インターネット接続
+- SwitchBotアカウントとSwitchBot Cloud APIトークン
 
-1. SwitchBotのスマホアプリを開き、ログインします。
-2. プロフィール > 設定 > 基本データ の **アプリバージョン** を10回タップします。
-3. 開発者向けオプションをタップすると表示される **トークン** をメモしておいてください。
+配布ZIPには.NETとWindows App SDKの実行環境が含まれるため、利用者側でSDKをインストールする必要はありません。
 
-<img src="./docs/images/setting.jpg" width="250" alt="setting" />
-<img src="./docs/images/developerOptions.jpg" width="250" alt="developerOptions" />
+## インストールと起動
 
+1. [GitHub Releases](https://github.com/tanagiew/SwitchBotController/releases)から最新の`SwitchBotController-vX.Y.Z-win-x64.zip`をダウンロードします。
+2. ZIPを任意のフォルダーへ展開します。
+3. `config.json.example`を`config.json`という名前でコピーし、後述の内容を設定します。
+4. `SwitchBotController.exe`を実行します。
 
-4. SwitchBotデバイスの 設定 > デバイス情報 を開き **BLE MAC** をメモしておいてください。
+現在の配布物にはコード署名がないため、初回起動時にWindowsの警告が表示される場合があります。信頼できるGitHub Releasesから取得したファイルであることを確認してから実行してください。
 
-<img src="./docs/images/deviceInformation.jpg" width="250" alt="deviceInformation" />
+## `config.json`の準備
 
+### APIトークン
 
-5. config.json.exampleに倣ってconfig.jsonを新規作成してください。
-  - api_token : メモした **トークン**
-  - name : アプリ上で表示するデバイス名
-  - ble_mac : デバイスごとの **BLE MAC** （コロンを除く）
+1. SwitchBotスマートフォンアプリへログインします。
+2. 「プロフィール」→「設定」→「基本データ」を開き、アプリバージョンを10回タップします。
+3. 表示された「開発者向けオプション」を開き、トークンを確認します。
 
-> WinUI 3移行版は、既存環境との互換性のため `api_key` / `device_id` 形式も読み込めます。
+<img src="./docs/images/setting.jpg" width="250" alt="SwitchBotアプリの設定画面" />
+<img src="./docs/images/developerOptions.jpg" width="250" alt="SwitchBotアプリの開発者向けオプション" />
 
-WinUI 3版で選択したファイルの場所は、MSIX版ではWindows管理のアプリローカル領域、非MSIX版では `%LOCALAPPDATA%\SwitchBotController\settings.json` に保存されます。APIトークンやデバイス情報はコピーせず、元の `config.json` にだけ保持します。選択したJSONを読み込めない場合は、現在使用中の設定を維持します。
+### デバイスのBLE MAC
 
-画面右上の設定ボタンから、現在使用中の `config.json` を既定のエディターで直接開くこともできます。編集後は再読み込みボタンで反映してください。
+各SwitchBotデバイスの「設定」→「デバイス情報」を開き、BLE MACを確認します。
 
----
+<img src="./docs/images/deviceInformation.jpg" width="250" alt="SwitchBotデバイス情報画面" />
 
-## WinUI 3版のビルド方法
+### 設定例
 
-### Requirements
+`config.json.example`を参考に、次の形式で記述します。`ble_mac`からコロン（`:`）を除いてください。
 
-- Windows 10 1809以降
+```json
+{
+  "api_token": "SwitchBotアプリで確認したトークン",
+  "devices": [
+    { "name": "Curtain", "ble_mac": "AABBCCDDEEFF" },
+    { "name": "LED", "ble_mac": "112233445566" }
+  ]
+}
+```
+
+- `api_token`: SwitchBot Cloud APIトークン
+- `name`: アプリに表示する任意のデバイス名
+- `ble_mac`: デバイスのBLE MAC（コロンなし）
+
+従来の`api_key`／`device_id`形式も互換性のため読み込めますが、新しい設定には上記形式を推奨します。
+
+> [!CAUTION]
+> `config.json`にはAPIトークンが含まれます。公開リポジトリへの追加、他人への送付、スクリーンショットへの写り込みを避けてください。
+
+## 設定ファイルの切り替え
+
+画面右上の設定ボタンから、使用するJSONファイルを選択できます。選択したファイルを読み込めない場合、現在使用中の設定は維持されます。
+
+アプリが保存するのは選択したファイルの絶対パスだけです。APIトークンとデバイス情報は元の`config.json`にのみ保持されます。保存先は非MSIX版では`%LOCALAPPDATA%\SwitchBotController\settings.json`です。
+
+「現在の設定ファイルを開く」で`config.json`を既定のエディターから編集できます。編集後は画面右上の再読み込みボタンで反映してください。
+
+## 開発
+
+### 必要な環境
+
 - .NET 10 SDK
-- Visual Studio 2026のWinUIアプリ開発環境とWindows App SDK
+- Visual Studio 2026のWinUIアプリ開発環境
+- Windows App SDK
+
+### ビルドとテスト
 
 ```powershell
 dotnet restore .\SwitchBotController.sln
 dotnet test .\tests\SwitchBotController.Core.Tests\SwitchBotController.Core.Tests.csproj
+dotnet test .\tests\SwitchBotController.App.Tests\SwitchBotController.App.Tests.csproj
 dotnet build .\SwitchBotController.sln --configuration Debug --property:Platform=x64
 dotnet run --project .\src\SwitchBotController.App\SwitchBotController.App.csproj --property:Platform=x64
 ```
 
-## Python版のビルド方法
+### 配布ZIPの作成
 
-ご自身でビルドする場合は下記情報を参考にしてください。
-
-### Requirements
-- Windows
-- Python 3.10+（推奨: 3.12）
-
-### Repository Layout (recommended)
-
-```
-SwitchBotController/
-  src/
-    switchbot_controller.py
-  scripts/
-    build.ps1
-  assets/
-    icon.ico
-  requirements.txt
-  config.json            # local only (DO NOT COMMIT)
-```
-
-### Setup
-```bat
-cd /d C:\workspace\SwitchBotController
-py -3.12 -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-python src\switchbot_controller.py
-```
-
-### One-command build
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1
+.\scripts\publish-release.ps1 -Version 1.0.0
 ```
 
-Output:
-- `dist\SwitchBotController.exe`
+自己完結型のunpackaged x64アプリを公開し、`artifacts\SwitchBotController-v1.0.0-win-x64.zip`を作成します。`config.json`は含まれず、雛形の`config.json.example`だけが含まれます。
+
+## ライセンス
+
+[MIT License](./LICENSE.md)

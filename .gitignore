@@ -1,11 +1,10 @@
-# Python
+# Local / legacy build artifacts
 __pycache__/
 *.py[cod]
-*.log
-
-# Virtual env
 .venv/
-venv/
+*.spec
+
+*.log
 
 # OS / editor
 .DS_Store
@@ -16,7 +15,6 @@ Thumbs.db
 # Build artifacts
 dist/
 build/
-*.spec
 [Bb]in/
 [Oo]bj/
 artifacts/
