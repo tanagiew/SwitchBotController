@@ -26,20 +26,7 @@ public sealed class SwitchBotClient(HttpClient httpClient) : ISwitchBotClient
         request.Headers.TryAddWithoutValidation("Authorization", apiToken);
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
-        StatusEnvelope? payload = null;
-
-        try
-        {
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            payload = await JsonSerializer.DeserializeAsync<StatusEnvelope>(
-                stream,
-                SerializerOptions,
-                cancellationToken);
-        }
-        catch (JsonException)
-        {
-            // A malformed response is represented as an unsuccessful status result.
-        }
+        var payload = await ReadEnvelopeAsync(response, cancellationToken);
 
         return new SwitchBotDeviceStatusResult(
             response.StatusCode,
@@ -77,14 +64,34 @@ public sealed class SwitchBotClient(HttpClient httpClient) : ISwitchBotClient
         });
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
-        return new SwitchBotCommandResult(response.StatusCode);
+        var payload = await ReadEnvelopeAsync(response, cancellationToken);
+        return new SwitchBotCommandResult(response.StatusCode, payload?.StatusCode);
+    }
+
+    private static async Task<ApiEnvelope?> ReadEnvelopeAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            return await JsonSerializer.DeserializeAsync<ApiEnvelope>(
+                stream,
+                SerializerOptions,
+                cancellationToken);
+        }
+        catch (JsonException)
+        {
+            // A malformed response is represented by a null payload.
+            return null;
+        }
     }
 
     private static string? FirstNonEmpty(params string?[] values) =>
         values.Select(value => value?.Trim())
             .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
 
-    private sealed class StatusEnvelope
+    private sealed class ApiEnvelope
     {
         [JsonPropertyName("statusCode")]
         public int? StatusCode { get; init; }

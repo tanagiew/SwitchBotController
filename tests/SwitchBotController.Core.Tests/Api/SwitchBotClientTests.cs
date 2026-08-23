@@ -126,7 +126,12 @@ public sealed class SwitchBotClientTests
             capturedUri = request.RequestUri;
             capturedToken = request.Headers.GetValues("Authorization").Single();
             capturedBody = await request.Content!.ReadAsStringAsync();
-            return new HttpResponseMessage(HttpStatusCode.OK);
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("""
+                    { "statusCode": 100, "body": {} }
+                    """)
+            };
         });
         var client = new SwitchBotClient(new HttpClient(handler));
 
@@ -139,6 +144,27 @@ public sealed class SwitchBotClientTests
         Assert.Contains($"\"command\":\"{expectedCommand}\"", capturedBody);
         Assert.Contains("\"parameter\":\"default\"", capturedBody);
         Assert.Contains("\"commandType\":\"command\"", capturedBody);
+    }
+
+    [Fact]
+    public async Task SendCommandAsync_IsUnsuccessfulForApiError()
+    {
+        var handler = new RecordingHandler(_ =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("""
+                    { "statusCode": 190, "body": {} }
+                    """)
+            }));
+        var client = new SwitchBotClient(new HttpClient(handler));
+
+        var result = await client.SendCommandAsync(
+            "secret-token",
+            "DEVICE-1",
+            SwitchBotCommand.TurnOn);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(190, result.ApiStatusCode);
     }
 
     private sealed class RecordingHandler(

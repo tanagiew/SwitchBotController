@@ -48,11 +48,21 @@ public sealed partial class MainPage : Page
         object sender,
         Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var picker = new FileOpenPicker();
-        picker.FileTypeFilter.Add(".json");
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+        Windows.Storage.StorageFile? file;
+        try
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".json");
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+            file = await picker.PickSingleFileAsync();
+        }
+        catch (Exception exception)
+        {
+            ViewModel.ReportSettingsError(
+                $"設定ファイルを選択できませんでした: {exception.Message}");
+            return;
+        }
 
-        var file = await picker.PickSingleFileAsync();
         if (file is null || !await ViewModel.ChangeConfigurationAsync(file.Path))
         {
             return;

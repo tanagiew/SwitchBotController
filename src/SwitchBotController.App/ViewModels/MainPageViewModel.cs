@@ -18,6 +18,7 @@ public sealed partial class MainPageViewModel : ObservableObject
 
     private readonly SwitchBotConfigLoader _configLoader;
     private readonly ISwitchBotClient _switchBotClient;
+    private CancellationTokenSource _configurationCancellation = new();
     private string _configPath;
     private string _apiToken = string.Empty;
     private bool _isInitialized;
@@ -69,19 +70,29 @@ public sealed partial class MainPageViewModel : ObservableObject
 
     public async Task<bool> ChangeConfigurationAsync(string configPath)
     {
+        var operation = BeginConfigurationOperation();
+        var cancellationToken = operation.Token;
         IsLoading = true;
         SetStatus("選択した設定を確認しています…");
 
         try
         {
             var normalizedPath = Path.GetFullPath(configPath);
-            var configuration = await _configLoader.LoadAsync(normalizedPath);
+            var configuration = await _configLoader.LoadAsync(
+                normalizedPath,
+                cancellationToken);
 
             _configPath = normalizedPath;
             ConfigLocation = normalizedPath;
-            var statusFailureCount = await ApplyConfigurationAsync(configuration);
+            var statusFailureCount = await ApplyConfigurationAsync(
+                configuration,
+                cancellationToken);
             SetLoadedStatus(statusFailureCount);
             return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return false;
         }
         catch (Exception exception)
         {
@@ -92,7 +103,10 @@ public sealed partial class MainPageViewModel : ObservableObject
         }
         finally
         {
-            IsLoading = false;
+            if (ReferenceEquals(_configurationCancellation, operation))
+            {
+                IsLoading = false;
+            }
         }
     }
 
@@ -104,14 +118,24 @@ public sealed partial class MainPageViewModel : ObservableObject
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task ReloadAsync()
     {
+        var operation = BeginConfigurationOperation();
+        var cancellationToken = operation.Token;
         IsLoading = true;
         SetStatus("設定を読み込んでいます…");
 
         try
         {
-            var configuration = await _configLoader.LoadAsync(_configPath);
-            var statusFailureCount = await ApplyConfigurationAsync(configuration);
+            var configuration = await _configLoader.LoadAsync(
+                _configPath,
+                cancellationToken);
+            var statusFailureCount = await ApplyConfigurationAsync(
+                configuration,
+                cancellationToken);
             SetLoadedStatus(statusFailureCount);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // A newer reload or configuration change owns the UI state.
         }
         catch (Exception exception)
         {
@@ -123,11 +147,16 @@ public sealed partial class MainPageViewModel : ObservableObject
         }
         finally
         {
-            IsLoading = false;
+            if (ReferenceEquals(_configurationCancellation, operation))
+            {
+                IsLoading = false;
+            }
         }
     }
 
-    private async Task<int> ApplyConfigurationAsync(SwitchBotConfiguration configuration)
+    private async Task<int> ApplyConfigurationAsync(
+        SwitchBotConfiguration configuration,
+        CancellationToken cancellationToken)
     {
         _apiToken = configuration.ApiToken;
 
@@ -143,10 +172,13 @@ public sealed partial class MainPageViewModel : ObservableObject
         using var gate = new SemaphoreSlim(MaxConcurrentStatusRequests);
         var refreshTasks = Devices.Select(async device =>
         {
-            await gate.WaitAsync();
+            await gate.WaitAsync(cancellationToken);
             try
             {
-                return await RefreshDeviceStatusAsync(device);
+                return await RefreshDeviceStatusAsync(
+                    device,
+                    configuration.ApiToken,
+                    cancellationToken);
             }
             finally
             {
@@ -169,6 +201,8 @@ public sealed partial class MainPageViewModel : ObservableObject
         }
 
         var operation = command == SwitchBotCommand.TurnOn ? "ON" : "OFF";
+        var apiToken = _apiToken;
+        var cancellationToken = _configurationCancellation.Token;
         device.IsBusy = true;
         device.StatusText = $"{operation} を送信中…";
         SetStatus($"{device.Name} に {operation} を送信しています…");
@@ -176,9 +210,10 @@ public sealed partial class MainPageViewModel : ObservableObject
         try
         {
             var result = await _switchBotClient.SendCommandAsync(
-                _apiToken,
+                apiToken,
                 device.DeviceId,
-                command);
+                command,
+                cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -187,15 +222,22 @@ public sealed partial class MainPageViewModel : ObservableObject
                     InfoBarSeverity.Success);
                 await RefreshStatusAfterCommandAsync(
                     device,
-                    fallbackText: $"{operation} 完了 · 状態未確認");
+                    apiToken,
+                    fallbackText: $"{operation} 完了 · 状態未確認",
+                    cancellationToken);
             }
             else
             {
-                device.StatusText = $"送信失敗 · HTTP {(int)result.StatusCode}";
+                var failureDetails = FormatCommandFailure(result);
+                device.StatusText = $"送信失敗 · {failureDetails}";
                 SetStatus(
-                    $"{device.Name} の操作に失敗しました（HTTP {(int)result.StatusCode}）",
+                    $"{device.Name} の操作に失敗しました（{failureDetails}）",
                     InfoBarSeverity.Error);
             }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            device.StatusText = "操作を中断しました";
         }
         catch (Exception exception)
         {
@@ -212,6 +254,8 @@ public sealed partial class MainPageViewModel : ObservableObject
 
     private async Task<bool> RefreshDeviceStatusAsync(
         DeviceControlViewModel device,
+        string apiToken,
+        CancellationToken cancellationToken,
         bool updateBusyState = true,
         string fallbackText = "状態を取得できません")
     {
@@ -225,11 +269,16 @@ public sealed partial class MainPageViewModel : ObservableObject
         try
         {
             var result = await _switchBotClient.GetStatusAsync(
-                _apiToken,
-                device.DeviceId);
+                apiToken,
+                device.DeviceId,
+                cancellationToken);
 
             ApplyDeviceStatus(device, result, fallbackText);
             return result.IsSuccess;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch
         {
@@ -247,14 +296,16 @@ public sealed partial class MainPageViewModel : ObservableObject
 
     private async Task RefreshStatusAfterCommandAsync(
         DeviceControlViewModel device,
-        string fallbackText)
+        string apiToken,
+        string fallbackText,
+        CancellationToken cancellationToken)
     {
         var positionBeforeCommand = device.LastKnownPosition;
         var previousPosition = positionBeforeCommand;
         var observedActivity = false;
         var stablePositionCount = 0;
 
-        await Task.Delay(InitialCommandStatusDelay);
+        await Task.Delay(InitialCommandStatusDelay, cancellationToken);
 
         for (var pollIndex = 0; pollIndex < StatusCompletionPollCount; pollIndex++)
         {
@@ -262,8 +313,13 @@ public sealed partial class MainPageViewModel : ObservableObject
             try
             {
                 result = await _switchBotClient.GetStatusAsync(
-                    _apiToken,
-                    device.DeviceId);
+                    apiToken,
+                    device.DeviceId,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch
             {
@@ -302,8 +358,17 @@ public sealed partial class MainPageViewModel : ObservableObject
             }
 
             previousPosition = result.Position;
-            await Task.Delay(CommandStatusPollInterval);
+            await Task.Delay(CommandStatusPollInterval, cancellationToken);
         }
+    }
+
+    private CancellationTokenSource BeginConfigurationOperation()
+    {
+        var next = new CancellationTokenSource();
+        var previous = Interlocked.Exchange(ref _configurationCancellation, next);
+        previous.Cancel();
+        previous.Dispose();
+        return next;
     }
 
     private static void ApplyDeviceStatus(
@@ -353,6 +418,11 @@ public sealed partial class MainPageViewModel : ObservableObject
 
         return details.Count > 0 ? string.Join(" · ", details) : "状態取得済み";
     }
+
+    private static string FormatCommandFailure(SwitchBotCommandResult result) =>
+        result.ApiStatusCode is int apiStatusCode
+            ? $"HTTP {(int)result.StatusCode} / API {apiStatusCode}"
+            : $"HTTP {(int)result.StatusCode}";
 
     private void SetStatus(
         string message,

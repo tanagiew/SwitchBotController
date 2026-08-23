@@ -24,7 +24,7 @@
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\StoreLogo.scale-*.png" />
     <Content Include="Assets\AppIcon.ico" />
-    <Content Include="Assets\TitleBarIcon*.png" />
+    <Content Include="Assets\TitleBarIconV2*.png" />
     <Content Include="Assets\Wide310x150Logo.scale-*.png" />
   </ItemGroup>
 

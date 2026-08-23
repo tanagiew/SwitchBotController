@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchBotController.Core.Tests", "tests\SwitchBotController.Core.Tests\SwitchBotController.Core.Tests.csproj", "{ECCCEDF3-498D-4390-A21B-E7C12315283A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchBotController.App.Tests", "tests\SwitchBotController.App.Tests\SwitchBotController.App.Tests.csproj", "{7016F193-B03A-4577-9FEA-C23C07FA636D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,18 @@ Global
 		{ECCCEDF3-498D-4390-A21B-E7C12315283A}.Release|x64.Build.0 = Release|Any CPU
 		{ECCCEDF3-498D-4390-A21B-E7C12315283A}.Release|x86.ActiveCfg = Release|Any CPU
 		{ECCCEDF3-498D-4390-A21B-E7C12315283A}.Release|x86.Build.0 = Release|Any CPU
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|Any CPU.Build.0 = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|x64.ActiveCfg = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|x64.Build.0 = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|x86.ActiveCfg = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Debug|x86.Build.0 = Debug|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|Any CPU.ActiveCfg = Release|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|Any CPU.Build.0 = Release|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|x64.ActiveCfg = Release|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|x64.Build.0 = Release|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|x86.ActiveCfg = Release|x64
+		{7016F193-B03A-4577-9FEA-C23C07FA636D}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +81,6 @@ Global
 		{0CCCA485-5F99-482F-8E13-A6E6CDDB50C9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{FA8DA138-D941-46E2-9753-E45E299FB914} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{ECCCEDF3-498D-4390-A21B-E7C12315283A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{7016F193-B03A-4577-9FEA-C23C07FA636D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
