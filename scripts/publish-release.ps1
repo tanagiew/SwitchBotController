@@ -49,6 +49,9 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item -LiteralPath (Join-Path $repoRoot 'config.json.example') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repoRoot 'README.md') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE.md') -Destination $publishDirectory
+$releaseImagesDirectory = Join-Path $publishDirectory 'docs\images'
+New-Item -ItemType Directory -Path $releaseImagesDirectory -Force | Out-Null
+Copy-Item -Path (Join-Path $repoRoot 'docs\images\*') -Destination $releaseImagesDirectory
 
 Compress-Archive -Path (Join-Path $publishDirectory '*') -DestinationPath $archivePath -CompressionLevel Optimal
 

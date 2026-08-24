@@ -11,6 +11,8 @@ SwitchBot Cloud APIを使い、`config.json`に登録したデバイスをWindow
 
 SwitchBotデバイスを対象としており、Hub経由の赤外線リモコンには対応していません。
 
+<img src="./docs/images/app-main.png" width="360" alt="SwitchBot Controllerのメイン画面" />
+
 ## 動作環境
 
 - 64bit版のWindows 10 Version 1809以降、またはWindows 11
