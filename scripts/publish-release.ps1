@@ -47,12 +47,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Copy-Item -LiteralPath (Join-Path $repoRoot 'config.json.example') -Destination $publishDirectory
-Copy-Item -LiteralPath (Join-Path $repoRoot 'README.md') -Destination $publishDirectory
-Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE.md') -Destination $publishDirectory
-$releaseImagesDirectory = Join-Path $publishDirectory 'docs\images'
-New-Item -ItemType Directory -Path $releaseImagesDirectory -Force | Out-Null
-Copy-Item -Path (Join-Path $repoRoot 'docs\images\*') -Destination $releaseImagesDirectory
+$releaseExecutable = Join-Path $publishDirectory 'SwitchBotController.exe'
+$releaseConfigExample = Join-Path $publishDirectory 'config.json.example'
 
-Compress-Archive -Path (Join-Path $publishDirectory '*') -DestinationPath $archivePath -CompressionLevel Optimal
+if (-not (Test-Path -LiteralPath $releaseExecutable)) {
+    throw "Published executable not found: $releaseExecutable"
+}
+
+Compress-Archive `
+    -LiteralPath $releaseExecutable, $releaseConfigExample `
+    -DestinationPath $archivePath `
+    -CompressionLevel Optimal
 
 Write-Host "Release archive created: $archivePath"
