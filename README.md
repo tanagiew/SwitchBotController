@@ -23,7 +23,7 @@ SwitchBotデバイスを対象としており、Hub経由の赤外線リモコ�
 
 ## インストールと起動
 
-1. [GitHub Releases](https://github.com/tanagiew/SwitchBotController/releases)から最新の`SwitchBotController-vX.Y.Z-win-x64.zip`をダウンロードします。
+1. [GitHub Releases](https://github.com/tanagiew/SwitchBotController/releases)から最新の`SwitchBotController_vX.Y.Z_win-x64.zip`をダウンロードします。
 2. ZIPを任意のフォルダーへ展開します。
 3. `config.json.example`を`config.json`という名前でコピーし、後述の内容を設定します。
 4. `SwitchBotController.exe`を実行します。
@@ -99,10 +99,10 @@ dotnet run --project .\src\SwitchBotController.App\SwitchBotController.App.cspro
 ### 配布ZIPの作成
 
 ```powershell
-.\scripts\publish-release.ps1 -Version 1.0.0
+.\scripts\publish-release.ps1 -Version 2.0.0
 ```
 
-自己完結型・単一EXEのunpackaged x64アプリを公開し、`artifacts\SwitchBotController-v1.0.0-win-x64.zip`を作成します。ZIPには`SwitchBotController.exe`と`config.json.example`だけが含まれ、`config.json`は含まれません。単一EXEは初回起動時に必要な実行環境をWindowsの一時領域へ展開します。
+自己完結型・単一EXEのunpackaged x64アプリを公開し、`artifacts\SwitchBotController_v2.0.0_win-x64.zip`を作成します。ZIPには`SwitchBotController.exe`と`config.json.example`だけが含まれ、`config.json`は含まれません。単一EXEは初回起動時に必要な実行環境をWindowsの一時領域へ展開します。
 
 ## ライセンス
 
