@@ -13,14 +13,6 @@ SwitchBotデバイスを対象としており、Hub経由の赤外線リモコ�
 
 <img src="./docs/images/app-main.png" width="360" alt="SwitchBot Controllerのメイン画面" />
 
-## 動作環境
-
-- 64bit版のWindows 10 Version 1809以降、またはWindows 11
-- インターネット接続
-- SwitchBotアカウントとSwitchBot Cloud APIトークン
-
-配布ZIPには.NETとWindows App SDKの実行環境が含まれるため、利用者側でSDKをインストールする必要はありません。
-
 ## インストールと起動
 
 1. [GitHub Releases](https://github.com/tanagiew/SwitchBotController/releases)から最新の`SwitchBotController_vX.Y.Z_win-x64.zip`をダウンロードします。
@@ -69,14 +61,6 @@ SwitchBotデバイスを対象としており、Hub経由の赤外線リモコ�
 
 > [!CAUTION]
 > `config.json`にはAPIトークンが含まれます。公開リポジトリへの追加、他人への送付、スクリーンショットへの写り込みを避けてください。
-
-## 設定ファイルの切り替え
-
-画面右上の設定ボタンから、使用するJSONファイルを選択できます。選択したファイルを読み込めない場合、現在使用中の設定は維持されます。
-
-アプリが保存するのは選択したファイルの絶対パスだけです。APIトークンとデバイス情報は元の`config.json`にのみ保持されます。保存先は非MSIX版では`%LOCALAPPDATA%\SwitchBotController\settings.json`です。
-
-「現在の設定ファイルを開く」で`config.json`を既定のエディターから編集できます。編集後は画面右上の再読み込みボタンで反映してください。
 
 ## 開発
 
