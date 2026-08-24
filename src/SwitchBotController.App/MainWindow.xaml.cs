@@ -27,7 +27,7 @@ public sealed partial class MainWindow : Window
         var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var displayScale = GetDpiForWindow(windowHandle) / 96d;
         AppWindow.Resize(new Windows.Graphics.SizeInt32(
-            (int)Math.Round(600 * displayScale),
+            (int)Math.Round(500 * displayScale),
             (int)Math.Round(760 * displayScale)));
 
         // Navigate the root frame to the main page on startup.
