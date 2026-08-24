@@ -96,14 +96,6 @@ dotnet build .\SwitchBotController.sln --configuration Debug --property:Platform
 dotnet run --project .\src\SwitchBotController.App\SwitchBotController.App.csproj --property:Platform=x64
 ```
 
-### 配布ZIPの作成
-
-```powershell
-.\scripts\publish-release.ps1 -Version 2.0.0
-```
-
-自己完結型・単一EXEのunpackaged x64アプリを公開し、`artifacts\SwitchBotController_v2.0.0_win-x64.zip`を作成します。ZIPには`SwitchBotController.exe`と`config.json.example`だけが含まれ、`config.json`は含まれません。単一EXEは初回起動時に必要な実行環境をWindowsの一時領域へ展開します。
-
 ## ライセンス
 
 [MIT License](./LICENSE.md)
